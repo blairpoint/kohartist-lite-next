@@ -29,19 +29,11 @@ export default function App() {
   const [activeEventsCount, setActiveEventsCount] = useState(0);
   const [showRuleGuide, setShowRuleGuide] = useState(false);
 
-  // Monitor Auth State
+  // Auth state is no longer restored on load via /api/me (that call is disabled).
+  // The app simply starts logged-out; users need to log in each visit,
+  // and `user` gets populated directly from the /api/login or /api/register response.
   useEffect(() => {
-    api.get('/api/me')
-      .then(res => {
-        setUser({ ...res, uid: res._id });
-        setActiveTab('artist');
-      })
-      .catch(() => {
-        setUser(null);
-      })
-      .finally(() => {
-        setAuthLoading(false);
-      });
+    setAuthLoading(false);
   }, []);
 
   // Monitor overall active live events
