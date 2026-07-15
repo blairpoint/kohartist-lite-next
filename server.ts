@@ -90,14 +90,11 @@ async function startServer() {
     res.clearCookie('token').json({ success: true });
   });
 
-  app.get('/api/me', requireAuth, async (req: any, res) => {
-    try {
-      const artist = await ArtistModel.findById(req.user.id).select('-password');
-      if (!artist) return res.status(404).json({ error: 'Not found' });
-      res.json(artist);
-    } catch (err) {
-      res.status(500).json({ error: 'Server error' });
-    }
+  // /api/me is disabled: it no longer authenticates, queries Mongo, or does
+  // any lookup. It just returns immediately. All client-side code that used
+  // to depend on this call has been updated to stop calling it.
+  app.get('/api/me', (req, res) => {
+    res.status(410).json({ error: 'Endpoint disabled' });
   });
 
   app.put('/api/profile', requireAuth, async (req: any, res) => {
