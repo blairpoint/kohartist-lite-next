@@ -73,9 +73,11 @@ export default function Header(props: HeaderProps) {
         localStorage.setItem('kohartist_saved_email', username);
       }
 
-      // Fetch complete fresh profile data to keep in-sync
-      const freshUser = await api.get('/api/me');
-      setUser({ ...freshUser, uid: freshUser._id });
+      // Use the artist data already returned by login/register instead of
+      // making a separate /api/me call (that endpoint is disabled).
+      if (res.artist) {
+        setUser({ ...res.artist, uid: res.artist.id, _id: res.artist.id });
+      }
 
       setShowAuthModal(false);
       setActiveTab('artist');
