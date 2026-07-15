@@ -1,0 +1,6 @@
+{
+  "name": "Kohartist",
+  "description": "A 100% free tipping platform for artists and musicians with zero platform fees.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

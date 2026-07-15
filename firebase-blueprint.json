@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "Artist": {
+      "title": "Artist",
+      "description": "Public profile details of an artist or DJ.",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 50,
+          "description": "The artist's public display name."
+        },
+        "bio": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "A short bio of the artist."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 2048,
+          "description": "URL to the artist's profile picture or chosen avatar."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this artist profile was created."
+        }
+      },
+      "required": ["displayName", "createdAt"]
+    },
+    "ArtistPrivate": {
+      "title": "ArtistPrivate",
+      "description": "Private settings and PII for the artist.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254,
+          "description": "The private email of the artist."
+        },
+        "stripeAccountId": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Linked mock Stripe account ID."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last updated timestamp."
+        }
+      },
+      "required": ["email", "updatedAt"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "An active live event or approved fundraiser.",
+      "type": "object",
+      "properties": {
+        "artistId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "The ID of the artist who created the event."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100,
+          "description": "Title of the live event or fundraiser."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Short description of what the event/fundraiser is."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["live", "fundraiser"],
+          "description": "Whether this is a live event set or a dedicated fundraiser."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "completed"],
+          "description": "Whether the event is currently ongoing or has finished."
+        },
+        "targetAmount": {
+          "type": "number",
+          "description": "Optional fundraising target in USD."
+        },
+        "currentAmount": {
+          "type": "number",
+          "description": "Total amount tipped during this event in USD."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the event was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the event was last updated."
+        }
+      },
+      "required": ["artistId", "title", "type", "status", "currentAmount", "createdAt", "updatedAt"]
+    },
+    "Tip": {
+      "title": "Tip",
+      "description": "A gifted donation transaction from a fan.",
+      "type": "object",
+      "properties": {
+        "artistId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "The ID of the artist receiving the tip."
+        },
+        "eventId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "The ID of the active event/fundraiser linked to the tip."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The tip amount in USD."
+        },
+        "fanName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Name of the fan who sent the tip."
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "An optional short message from the fan."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the tip was successfully submitted."
+        }
+      },
+      "required": ["artistId", "eventId", "amount", "fanName", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/artists/{artistId}": {
+      "schema": { "$ref": "#/entities/Artist" },
+      "description": "Public artist profiles."
+    },
+    "/artists/{artistId}/private/settings": {
+      "schema": { "$ref": "#/entities/ArtistPrivate" },
+      "description": "Private artist data."
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/Event" },
+      "description": "Live events and fundraisers."
+    },
+    "/tips/{tipId}": {
+      "schema": { "$ref": "#/entities/Tip" },
+      "description": "Gifted donation tips."
+    }
+  }
+}
