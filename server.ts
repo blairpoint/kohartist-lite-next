@@ -35,7 +35,13 @@ async function startServer() {
 
   // Auth Middleware
   const requireAuth = (req: any, res: any, next: any) => {
-    const token = req.cookies.token;
+    let token = req.cookies.token;
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && parts[0] === 'Bearer') {
+        token = parts[1];
+      }
+    }
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
@@ -58,7 +64,7 @@ async function startServer() {
       await artist.save();
       
       const token = jwt.sign({ id: artist._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' }).json({ success: true, artist: { id: artist._id, displayName: artist.displayName } });
+      res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' }).json({ success: true, token, artist: { id: artist._id, displayName: artist.displayName } });
     } catch (err) {
       res.status(500).json({ error: 'Registration failed' });
     }
@@ -74,7 +80,7 @@ async function startServer() {
       if (!valid) return res.status(401).json({ error: 'Invalid password' });
       
       const token = jwt.sign({ id: artist._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' }).json({ success: true, artist: { id: artist._id, displayName: artist.displayName } });
+      res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' }).json({ success: true, token, artist: { id: artist._id, displayName: artist.displayName } });
     } catch (err) {
       res.status(500).json({ error: 'Login failed' });
     }

@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Music, LogOut, User as UserIcon, HelpCircle, X } from 'lucide-react';
 import { api } from '../api';
 
@@ -20,7 +20,9 @@ export default function Header(props: HeaderProps) {
   const { user, setUser, activeTab, setActiveTab, onShowRuleGuide } = props;
   const [localShowAuthModal, setLocalShowAuthModal] = useState(false);
   const [localIsLogin, setLocalIsLogin] = useState(true);
-  const [localUsername, setLocalUsername] = useState('');
+  const [localUsername, setLocalUsername] = useState(() => {
+    return localStorage.getItem('kohartist_saved_email') || '';
+  });
 
   const showAuthModal = props.showAuthModal !== undefined ? props.showAuthModal : localShowAuthModal;
   const setShowAuthModal = props.setShowAuthModal !== undefined ? props.setShowAuthModal : setLocalShowAuthModal;
@@ -40,6 +42,21 @@ export default function Header(props: HeaderProps) {
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getDefaultArtistName = (email: string) => {
+    if (!email) return '';
+    const part = email.split('@')[0];
+    return part
+      .split(/[\._-]/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  useEffect(() => {
+    if (props.registerEmail) {
+      setDisplayName(getDefaultArtistName(props.registerEmail));
+    }
+  }, [props.registerEmail]);
+
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -50,7 +67,16 @@ export default function Header(props: HeaderProps) {
       } else {
         res = await api.post('/api/register', { username, password, displayName: displayName || username });
       }
-      setUser(res.artist);
+
+      if (res.token) {
+        localStorage.setItem('kohartist_token', res.token);
+        localStorage.setItem('kohartist_saved_email', username);
+      }
+
+      // Fetch complete fresh profile data to keep in-sync
+      const freshUser = await api.get('/api/me');
+      setUser({ ...freshUser, uid: freshUser._id });
+
       setShowAuthModal(false);
       setActiveTab('artist');
       // Clear form states on success
@@ -71,11 +97,12 @@ export default function Header(props: HeaderProps) {
   const handleLogout = async () => {
     try {
       await api.post('/api/logout', {});
-      setUser(null);
-      setActiveTab('fan');
     } catch (error) {
       console.error("Logout failed:", error);
     }
+    localStorage.removeItem('kohartist_token');
+    setUser(null);
+    setActiveTab('fan');
   };
 
   return (

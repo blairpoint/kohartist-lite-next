@@ -34,6 +34,7 @@ export default function App() {
     api.get('/api/me')
       .then(res => {
         setUser({ ...res, uid: res._id });
+        setActiveTab('artist');
       })
       .catch(() => {
         setUser(null);
