@@ -21,22 +21,15 @@ export default function DetailedProfileEditor({ user }: { user: any }) {
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get(`/api/me`);
-        setProfile({
-          biography: res.biography || '',
-          portfolio: res.portfolio || [],
-          socialLinks: res.socialLinks || [],
-          tipJarMessage: res.tipJarMessage || 'Thank you for supporting my art!'
-        });
-      } catch (err) {
-        console.error('Failed to load profile', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
+    // Derive the detailed profile fields from the `user` prop instead of
+    // fetching them from /api/me (that endpoint is disabled).
+    setProfile({
+      biography: user?.biography || user?.bio || '',
+      portfolio: user?.portfolio || [],
+      socialLinks: user?.socialLinks || [],
+      tipJarMessage: user?.tipJarMessage || 'Thank you for supporting my art!'
+    });
+    setLoading(false);
   }, [user]);
 
   const handleSave = async (e: FormEvent) => {
