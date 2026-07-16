@@ -40,10 +40,18 @@ export default function App() {
   useEffect(() => {
     api.get('/api/events')
       .then((events: any[]) => {
-        const active = events.filter(e => e.status === 'active');
+        // Guard checking if the array payload is malformed or empty
+        if (!events || !Array.isArray(events)) {
+          setActiveEventsCount(0);
+          return;
+        }
+        const active = events.filter(e => e && e.status === 'active');
         setActiveEventsCount(active.length);
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error('Failed to fetch streaming event metrics:', err);
+        setActiveEventsCount(0);
+      });
   }, []);
 
   if (authLoading) {
